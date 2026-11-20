@@ -1,6 +1,12 @@
 # tuto_proxmox_domotique_pc
 Mise en place du serveur domotique sur pc
 
+## Configuration 
+### Autres
+Désactivation du Bluetooth. Depuis le BIOS (F10) :
+1.Dans Security > Built-In Device Options (en bas).
+2.Cherche une ligne Bluetooth, Wireless LAN ou Embedded WLAN/Bluetooth. Et le mettre sur Disable.
+
 ## Backup
 ### Proxmox
 | Planification| Sélection| Rétention|
