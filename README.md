@@ -2,7 +2,13 @@
 Mise en place du serveur domotique sur pc
 
 ## Backup
-### Promox configuration
+### Proxmox
+| Planification| Sélection| Rétention|
+|:----------|:----:|------:|
+| Mensuel (1er du mois, 00:00) | ex : 110 – AdGuard Home | keep-last=2 | 
+| Quotidien 21:00 | LXC 100 – Immich, VM 103 – Home Assistant et LXC 101 | keep-last=3 | 
+ex : https://domo.rem81.com/index.php/2026/08/01/proxmox-backup-server-ma-strategie-de-sauvegarde-jobs-retention-stockage/
+### Proxmox configuration (système)
 /!\ On part du principe que la sauvegarde est sur un 2ème disque dur.
 Sur ce disque qui est monté dans /mnt/data créer le repertoire "backups" et dedans le repertoire "proxmox-config"
 ```txt
