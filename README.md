@@ -76,6 +76,45 @@ rsync -rclnvi \
   /mnt/data/immich/ \
   /mnt/backup-usb/Immich/
 ```
+##### Complément
+Sauvegarder la configuration Immich
+```txt
+mkdir -p /mnt/backup-usb/Immich/configuration
+
+pct pull 100 /opt/immich/.env /tmp/immich.env
+pct config 100 > /mnt/backup-usb/Immich/configuration/lxc-100.conf
+tar -czf /mnt/backup-usb/Immich/configuration/immich-env.tar.gz -C /tmp immich.env
+
+rm -f /tmp/immich.env
+```
+conserver les définitions des services systemd
+```txt
+mkdir -p /mnt/backup-usb/Immich/configuration/systemd
+
+pct exec 100 -- tar czf - \
+  -C /etc/systemd/system \
+  immich-web.service \
+  immich-ml.service \
+  > /mnt/backup-usb/Immich/configuration/systemd/immich-services.tar.gz
+```
+et controler : 
+```txt
+gzip -t /mnt/backup-usb/Immich/configuration/immich-env.tar.gz
+gzip -t /mnt/backup-usb/Immich/configuration/systemd/immich-services.tar.gz
+```
+Remettre le service Immich actif : 
+```txt
+pct exec 100 -- systemctl start immich-ml.service immich-web.service
+pct exec 100 -- systemctl status immich-web.service immich-ml.service --no-pager
+pct exec 100 -- systemctl is-active postgresql@16-main.service redis-server.service
+```
+Demonter le disque externe : 
+```txt
+sync
+umount /mnt/backup-usb
+# Controler 
+lsblk
+```
 
 ### Autres
 Désactivation du Bluetooth. Depuis le BIOS (F10) :
