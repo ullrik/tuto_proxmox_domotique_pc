@@ -30,8 +30,8 @@ cp /etc/fstab /etc/fstab.bak-$(date +%F)
 # Ajouter le disque USB au démarrage (UUID via lsblk -o NAME,SIZE,MODEL,SERIAL,FSTYPE,LABEL,UUID,MOUNTPOINTS) :
 echo 'UUID=XXXX-XXXX /mnt/backup-usb exfat defaults,nofail,x-systemd.device-timeout=10 0 0' >> /etc/fstab
 # /!\ Le paramètre nofail est important : Proxmox pourra démarrer normalement même si le disque USB est débranché.
-# Vérifier la configuration
-umount /mnt/backup-usb
+# Vérifier la configuration (/!\ a ne pas être dans le repertoire /mnt/backup-usb)
+umount /mnt/backup-usb 
 systemctl daemon-reload
 mount -a
 # Vu du disque et confirme le bon montage automatique
@@ -136,7 +136,7 @@ pct exec 100 -- systemctl start immich-ml.service immich-web.service
 pct exec 100 -- systemctl status immich-web.service immich-ml.service --no-pager
 pct exec 100 -- systemctl is-active postgresql@16-main.service redis-server.service
 ```
-Demonter le disque externe : 
+Demonter le disque externe (/!\ a ne pas être dans le repertoire /mnt/backup-usb) : 
 ```txt
 sync
 umount /mnt/backup-usb
