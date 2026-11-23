@@ -69,7 +69,7 @@ Contrôler l'epsace utilisé et restant sur le disque backup :
 ```txt
 df -h /mnt/backup-usb
 ```
-Vérifier l'intégrité de la copie : 
+Vérifier l'intégrité de la copie (/!\ assez long) : 
 ```txt
 rsync -rclnvi \
   --no-owner --no-group --no-perms \
