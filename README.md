@@ -3,6 +3,53 @@ Mise en place du serveur domotique sur pc
 
 ## Configuration 
 
+### Notification au boot
+Dans un répertoire "Scripts" :
+```txt
+nano send-telegram.sh
+```
+```txt
+#!/bin/bash
+# Récupére le message en paramètre. Si pas de paramètre, message type
+
+MESSAGE="Notification"
+if [ $# -gt 0 ]; then
+    MESSAGE=$1
+#else
+    #echo "Your command line contains no arguments"
+fi
+TOKEN=XXXXXXXX:YYYYYYYYYYYYYYYYYYYYYYYY
+CHAT_ID=ZZZZZZZZZZZZ
+URL="https://api.telegram.org/bot$TOKEN/sendMessage"
+curl -s -X POST $URL -d chat_id=$CHAT_ID -d text="$MESSAGE"
+```
+Ensuite dans systemd/system :
+```txt
+nano notification-boot.service
+```
+```txt
+[Unit]
+Description=Send Telegram message at boot
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStartPre=/bin/sleep 10
+ExecStart=/bin/bash /PATH/scripts/send-telegram.sh "Démarrage : OK"
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
+
+```
+Pour l'activer : 
+```txt
+systemctl daemon-reload
+systemctl start notification-boot.service
+ystemctl enable notification-boot.service
+```
+
 ### Backup Externe
 #### Montage
 Brancher le disque externe en USB 
