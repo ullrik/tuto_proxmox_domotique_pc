@@ -38,6 +38,45 @@ mount -a
 df -h /mnt/backup-usb
 ```
 
+#### Immich 
+Prérequis : 
+Etape Montage
+```txt
+mkdir -p /mnt/backup-usb/Immich
+```
+1. Préparer Immich :
+Arrêter temporairement les deux services Immich, sans arrêter PostgreSQL ni Redis :
+```txt
+pct exec 100 -- systemctl stop immich-web.service immich-ml.service
+# Vérifie leur état :
+pct exec 100 -- systemctl status immich-web.service immich-ml.service --no-pager
+# Les deux services doivent apparaître comme inactive (dead).
+```
+2. Copie des données :
+```txt
+rsync -rltvh --info=progress2 \
+  --no-owner --no-group --no-perms \
+  /mnt/data/immich/ \
+  /mnt/backup-usb/Immich/
+```
+3. Controler :
+```txt
+# Taille réel des backups :
+du -sh --apparent-size /mnt/data/immich
+du -sh --apparent-size /mnt/backup-usb/Immich
+```
+Contrôler l'epsace utilisé et restant sur le disque backup : 
+```txt
+df -h /mnt/backup-usb
+```
+Vérifier l'intégrité de la copie : 
+```txt
+rsync -rclnvi \
+  --no-owner --no-group --no-perms \
+  /mnt/data/immich/ \
+  /mnt/backup-usb/Immich/
+```
+
 ### Autres
 Désactivation du Bluetooth. Depuis le BIOS (F10) :
 1.Dans Security > Built-In Device Options (en bas).
@@ -47,6 +86,14 @@ Désactivation du Bluetooth. Depuis le BIOS (F10) :
 rfkill block bluetooth
 # Pour controler (Soft blocked: yes)
 rfkill list bluetooth
+```
+
+Vérifier que les sauvegardes PostgreSQL sont exploitables :
+```txt
+for f in /mnt/data/immich/backups/*.sql.gz; do
+  echo "Vérification : $(basename "$f")"
+  gzip -t "$f" && echo "OK" || echo "ERREUR"
+done
 ```
 
 ## Backup
