@@ -38,6 +38,33 @@ mount -a
 df -h /mnt/backup-usb
 ```
 
+
+#### Proxmox 
+Prérequis : 
+
+Etape Montage
+```txt
+mkdir -p /mnt/backup-usb/Proxmox
+```
+1. Données :
+Elle doivent être fabriqué par Proxmox directement et via le script dans systemctl.
+
+Pour proxmox-config (via systemctl) :
+```txt
+rsync -rltvh --info=progress2 \
+  --no-owner --no-group --no-perms \
+  /mnt/data/backups/proxmox-config/ \
+  /mnt/backup-usb/Proxmox/
+```
+Pour proxmox (via l'interface graphique)
+```txt
+rsync -rltvh --info=progress2 \
+  --no-owner --no-group --no-perms \
+  /mnt/data/backups/proxmox/ \
+  /mnt/backup-usb/Proxmox/
+```
+/!\ renommer les fichiers coté /mnt/backup-usb/Proxmox/ ;)
+
 #### Immich 
 Prérequis : 
 
@@ -116,6 +143,7 @@ umount /mnt/backup-usb
 # Controler les disques toujours présent
 lsblk
 ```
+
 
 ### Autres
 Désactivation du Bluetooth. Depuis le BIOS (F10) :
