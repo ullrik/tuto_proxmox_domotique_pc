@@ -188,7 +188,9 @@ Demonter le disque externe (/!\ a ne pas être dans le repertoire /mnt/backup-us
 sync
 umount /mnt/backup-usb
 # Controler les disques toujours présent
-lsblk
+lsblk -o NAME,SIZE,MODEL,SERIAL,FSTYPE,LABEL,UUID,MOUNTPOINTS
+# Pour vraiment le stopper ensuite (désactiver le disque via le noyau Linux) :
+echo 1 > /sys/block/sdb/device/delete
 ```
 
 
