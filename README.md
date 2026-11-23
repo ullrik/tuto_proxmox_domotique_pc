@@ -40,6 +40,7 @@ df -h /mnt/backup-usb
 
 #### Immich 
 Prérequis : 
+
 Etape Montage
 ```txt
 mkdir -p /mnt/backup-usb/Immich
@@ -112,15 +113,19 @@ Demonter le disque externe :
 ```txt
 sync
 umount /mnt/backup-usb
-# Controler 
+# Controler les disques toujours présent
 lsblk
 ```
 
 ### Autres
 Désactivation du Bluetooth. Depuis le BIOS (F10) :
-1.Dans Security > Built-In Device Options (en bas).
-2.Cherche une ligne Bluetooth, Wireless LAN ou Embedded WLAN/Bluetooth. Et le mettre sur Disable.
-(Optionnel) Coté Linux/Proxmox :
+
+1. Dans Security > Built-In Device Options (en bas).
+
+2. Cherche une ligne Bluetooth, Wireless LAN ou Embedded WLAN/Bluetooth. Et le mettre sur Disable.
+(Optionnel) 
+
+Coté Linux/Proxmox :
 ```txt
 rfkill block bluetooth
 # Pour controler (Soft blocked: yes)
