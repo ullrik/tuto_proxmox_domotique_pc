@@ -4,7 +4,7 @@ Mise en place du serveur domotique sur pc
 ## Configuration 
 
 ### Notification au boot
-Dans un répertoire "Scripts" :
+Dans un répertoire "scripts" :
 ```txt
 nano send-telegram.sh
 ```
@@ -48,6 +48,89 @@ Pour l'activer :
 systemctl daemon-reload
 systemctl start notification-boot.service
 ystemctl enable notification-boot.service
+```
+
+### Notification à la connexion SSH 
+Dans un répertoire "scripts" :
+```txt
+nano send-telegram.sh
+```
+```txt
+#!/bin/bash
+
+if [ "$PAM_TYPE" = "open_session" ]; then
+    MSG="🔐 Nouvelle connexion SSH
+User: $PAM_USER
+IP: $PAM_RHOST
+Host: $(hostname)
+Date: $(date)"
+
+    TOKEN=XXXXXXXX:YYYYYYYYYYYYYYYYYYYYYYYY
+    CHAT_ID=ZZZZZZZZZZZZ
+    URL="https://api.telegram.org/bot$TOKEN/sendMessage"
+
+    /usr/bin/curl -s -X POST $URL -d chat_id=$CHAT_ID -d text="$MSG"
+fi
+```
+Creer un premier fichier qui sera dans la référence PAM
+```txt
+nano /PATH/scripts/ssh-login-notify.sh
+```
+```txt
+#!/bin/bash
+
+# Ne traiter que les ouvertures de session
+[ "$PAM_TYPE" = "open_session" ] || exit 0
+
+# Informations de connexion
+UTILISATEUR="${PAM_USER:-Inconnu}"
+IP="${PAM_RHOST:-Locale ou inconnue}"
+DATE=$(date '+%d/%m/%Y à %H:%M:%S')
+SERVEUR=$(hostname)
+
+# Construction du message
+MESSAGE="🔐 Connexion SSH sur Proxmox
+
+Serveur : ${SERVEUR}
+Utilisateur : ${UTILISATEUR}
+Adresse IP : ${IP}
+Date : ${DATE}"
+
+# Envoi Telegram en arrière-plan
+/PATH/scripts/send-telegram_ssh.sh "$MESSAGE" >/dev/null 2>&1 &
+
+exit 0
+```
+Puis : 
+```txt
+chmod 700 /Path/scripts/ssh-login-notify.sh
+```
+Activer la notification dans PAM
+
+conserve une copie du fichier original de pam sshd
+```txt
+cp /etc/pam.d/sshd /etc/pam.d/sshd.bak
+```
+Dans pam sshd
+```txt
+nano /etc/pam.d/sshd
+```
+Aprés la ligne : @include common-session. Ajoute juste en dessous :
+```txt
+# Notification Telegram à chaque connexion SSH
+session optional pam_exec.so seteuid /PATH/scripts/ssh-login-notify.sh
+```
+Controler :
+```txt
+grep -i "^UsePAM" /etc/ssh/sshd_config
+```
+Il faut avoir : UsePAM yes
+Pour tester faire : 
+```txt
+PAM_TYPE=open_session \
+PAM_USER=root \
+PAM_RHOST=192.168.1.50 \
+/PATH/scripts/ssh-login-notify.sh
 ```
 
 ### Backup Externe
@@ -236,7 +319,7 @@ mkdir backups/proxmox-config
 Création d'un script dans le répertoire root (de proxmox)
 Au préalable créer un répertoire scripts. 
 ```txt
-nano /root/scripts/backup-proxmox-config.sh
+nano /PATH/scripts/backup-proxmox-config.sh
 ```
 et le contenu : 
 ```bash
@@ -261,7 +344,7 @@ find "$BACKUP_DIR" -type f -name "proxmox-config-*.tar.gz" -mtime +30 -delete
 ```
 et pour l'executer : 
 ```txt
-chmod 700 /root/scripts/backup-proxmox-config.sh
+chmod 700 /PATH/scripts/backup-proxmox-config.sh
 ```
 
 #### Mise en place d'un service systemd
@@ -278,7 +361,7 @@ After=pve-cluster.service
 
 [Service]
 Type=oneshot
-ExecStart=/root/scripts/backup-proxmox-config.sh
+ExecStart=/PATH/scripts/backup-proxmox-config.sh
 ```
 Partie 2 : le timer
 ```txt
