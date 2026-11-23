@@ -2,6 +2,42 @@
 Mise en place du serveur domotique sur pc
 
 ## Configuration 
+
+### Backup Externe
+#### Montage
+Brancher le disque externe en USB 
+1. Identification du disque USB
+```txt
+lsblk -o NAME,SIZE,MODEL,SERIAL,FSTYPE,LABEL,UUID,MOUNTPOINTS
+blkid
+ls -l /dev/disk/by-id/ | grep -E 'usb|USB'
+```
+2. Monter temporairement le disque
+```txt
+# Créer le point de montage :
+mkdir -p /mnt/backup-usb
+# Monter le disque USB (UUID via lsblk -o NAME,SIZE,MODEL,SERIAL,FSTYPE,LABEL,UUID,MOUNTPOINTS) :
+mount -t exfat UUID=XXXX-XXXX /mnt/backup-usb
+# Vérifier le montage :
+df -h /mnt/backup-usb
+# Vérifier le contenu du disque :
+ls -lah /mnt/backup-usb
+```
+3. Configurer le montage automatique
+```txt
+# Sauvegarder le fichier fstab :
+cp /etc/fstab /etc/fstab.bak-$(date +%F)
+# Ajouter le disque USB au démarrage (UUID via lsblk -o NAME,SIZE,MODEL,SERIAL,FSTYPE,LABEL,UUID,MOUNTPOINTS) :
+echo 'UUID=XXXX-XXXX /mnt/backup-usb exfat defaults,nofail,x-systemd.device-timeout=10 0 0' >> /etc/fstab
+# /!\ Le paramètre nofail est important : Proxmox pourra démarrer normalement même si le disque USB est débranché.
+# Vérifier la configuration
+umount /mnt/backup-usb
+systemctl daemon-reload
+mount -a
+# Vu du disque et confirme le bon montage automatique
+df -h /mnt/backup-usb
+```
+
 ### Autres
 Désactivation du Bluetooth. Depuis le BIOS (F10) :
 1.Dans Security > Built-In Device Options (en bas).
